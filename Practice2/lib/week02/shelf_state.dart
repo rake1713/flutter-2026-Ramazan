@@ -15,6 +15,7 @@ final class Broken extends ShelfState{
     Broken(this.message);
 }
 
+
 String describe (ShelfState state)=> switch (state){
     Empty()=> 'Shelf is empty',
     Ready(:var books)=>'Shelf is ready with ${books.length} books',

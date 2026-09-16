@@ -38,22 +38,18 @@ class Library{
     
     Set<Genre> get presentGenres =>items.whereType<Book>().map((book) => book.genre).toSet();
 
-    double get avgPages{
-        final books=items.whereType<Book>();
-        if (books.isEmpty) return 0;
-
-        final totalPages=books.fold(0,(sum,book)=>sum+book.pages);//Мы не можем юзать редюс так как он тут должен будет вернуть не int а элемент типа Book поэтому выдает тут компайл ошибку
-        return totalPages/books.length;
-    }
+    double get avgPages => items.whereType<Book>().isEmpty ? 0.0 : items.whereType<Book>().fold(0, (sum, book) => sum + book.pages) /items.whereType<Book>().length;
+    //Мы не можем юзать редюс так как он тут должен будет вернуть не int а элемент типа Book поэтому выдает тут компайл ошибку
 
 
     List<String> get displayList => [
         'CATALOGUE',
-        for (var book in items.whereType<Book>()) '${book.title} - ${book.year}',
+        for (var book in items.whereType<Book>()) '${book.title} (${book.year})',
         ...uniqueAuthors,
         if (items.whereType<Book>().any((book)=>book.pages==0))
-        '(Incomplete data)',
+            '(Incomplete data)',
         ];
+    
 
     String get report => _cachedReport ??= 'Total items: ${items.length}';
 
