@@ -1,0 +1,142 @@
+import '../models/study_session.dart';
+import '../models/subject.dart';
+
+/// Twelve sessions with dates relative to today, so the app never goes stale.
+List<StudySession> seedSessions() {
+  final now = DateTime.now();
+  DateTime day(int offset, int hour, [int minute = 0]) =>
+      DateTime(now.year, now.month, now.day + offset, hour, minute);
+
+  return [
+    // 60-character title: must wrap to two lines without stripes.
+    StudySession(
+      id: 's1',
+      title: 'Linear Algebra Marathon: Eigenvalues, SVD and Midterm Review',
+      subject: Subject.math,
+      startsAt: day(2, 18),
+      place: 'KBTU, room 412',
+      capacity: 30,
+      members: const ['Aida', 'Dias', 'Madina', 'Arman'],
+      agenda: 'Eigenvalues, diagonalisation, SVD. Bring last year\'s exam.',
+      isFavourite: true,
+    ),
+    // At its limit: FULL badge, Join disabled.
+    StudySession(
+      id: 's2',
+      title: 'Flutter state management clinic',
+      subject: Subject.programming,
+      startsAt: day(1, 16),
+      place: 'KBTU, room 305',
+      capacity: 4,
+      members: const ['Alikhan', 'Zhanel', 'Kamila', 'Yerlan'],
+      agenda: 'setState vs. lifting state up, with your own lab code.',
+    ),
+    // Past: shown last, only with the Past filter.
+    StudySession(
+      id: 's3',
+      title: 'Physics 2: electromagnetism problems',
+      subject: Subject.physics,
+      startsAt: day(-1, 14),
+      place: 'Library, 2nd floor',
+      capacity: 12,
+      members: const ['Dana', 'Timur', 'Asel'],
+      agenda: 'Maxwell equations, problem set 6.',
+    ),
+    // Mode on: the place is a link.
+    StudySession(
+      id: 's4',
+      title: 'IELTS speaking practice',
+      subject: Subject.languages,
+      startsAt: day(0, 20),
+      place: 'https://meet.google.com/kbt-ielts-01',
+      capacity: 8,
+      members: const ['Aida', 'Nursultan', 'Asel', 'Dias'],
+      isOnline: true,
+      agenda: 'Part 2 cue cards, two minutes each, feedback in pairs.',
+    ),
+    // No optional text.
+    StudySession(
+      id: 's5',
+      title: 'Microeconomics midterm review',
+      subject: Subject.economics,
+      startsAt: day(3, 11),
+      place: 'KBTU, room 118',
+      capacity: 25,
+      members: const ['Madina', 'Arman'],
+    ),
+    StudySession(
+      id: 's6',
+      title: 'Figma basics for developers',
+      subject: Subject.design,
+      startsAt: day(4, 15, 30),
+      place: 'Design lab, room 210',
+      capacity: 6,
+      members: const ['Kamila', 'Zhanel', 'Timur'],
+      agenda: 'Frames, auto layout and handing a design to Flutter.',
+      isFavourite: true,
+    ),
+    // Started half an hour ago: the countdown shows Started.
+    StudySession(
+      id: 's7',
+      title: 'Dart records and patterns',
+      subject: Subject.programming,
+      startsAt: now.subtract(const Duration(minutes: 30)),
+      place: 'https://zoom.us/j/2026dart',
+      capacity: 50,
+      members: const ['Dias', 'Yerlan', 'Alikhan', 'Dana', 'Nursultan'],
+      isOnline: true,
+      agenda: 'Destructuring, switch expressions, sealed classes.',
+    ),
+    StudySession(
+      id: 's8',
+      title: 'Calculus 1: limits and derivatives',
+      subject: Subject.math,
+      startsAt: day(5, 10),
+      place: 'KBTU, room 401',
+      capacity: 20,
+      members: const ['Asel'],
+      agenda: 'Basics for first-year students.',
+    ),
+    StudySession(
+      id: 's9',
+      title: 'Turkish for beginners',
+      subject: Subject.languages,
+      startsAt: day(6, 19),
+      place: 'Library, room 3',
+      capacity: 10,
+      members: const ['Timur', 'Madina'],
+      agenda: 'Alphabet, greetings, numbers.',
+    ),
+    StudySession(
+      id: 's10',
+      title: 'Lab physics: report writing',
+      subject: Subject.physics,
+      startsAt: day(-3, 12),
+      place: 'KBTU, room 520',
+      capacity: 15,
+      members: const ['Arman', 'Kamila', 'Dana', 'Zhanel'],
+      agenda: 'Error bars, graphs, conclusions.',
+    ),
+    StudySession(
+      id: 's11',
+      title: 'Algorithms: dynamic programming',
+      subject: Subject.programming,
+      startsAt: day(8, 17),
+      place: 'KBTU, room 305',
+      capacity: 16,
+      members: const ['Alikhan', 'Dias', 'Nursultan'],
+      agenda: 'Knapsack, LIS, edit distance on LeetCode.',
+      isFavourite: true,
+    ),
+    StudySession(
+      id: 's12',
+      title: 'Personal finance for students',
+      subject: Subject.economics,
+      startsAt: day(10, 18, 30),
+      place: 'https://meet.google.com/kbt-money-12',
+      capacity: 100,
+      isOnline: true,
+      agenda: 'Budget, savings, first deposit.',
+    ),
+  ];
+}
