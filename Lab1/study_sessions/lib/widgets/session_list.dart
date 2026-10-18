@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import '../models/study_session.dart';
 import 'session_card.dart';
 
-/// A list on phones, a grid from 600 px. The width that matters is the one
-/// this widget gets, not the screen's, so it is a LayoutBuilder.
+/// A list on phones, a grid when this widget gets 600 px or more.
+/// LayoutBuilder asks about MY box, not about the whole screen.
 class SessionList extends StatelessWidget {
+  final List<StudySession> sessions;
+  final void Function(StudySession) onOpen;
+  final void Function(StudySession) onToggleFavourite;
+
   const SessionList({
     super.key,
     required this.sessions,
@@ -13,43 +17,37 @@ class SessionList extends StatelessWidget {
     required this.onToggleFavourite,
   });
 
-  static const gridBreakpoint = 600.0;
-  static const maxCellWidth = 360.0;
-
-  final List<StudySession> sessions;
-  final ValueChanged<StudySession> onOpen;
-  final ValueChanged<StudySession> onToggleFavourite;
-
-  Widget _card(StudySession s) => SessionCard(
-    key: ValueKey(s.id),
-    session: s,
-    onTap: () => onOpen(s),
-    onToggleFavourite: () => onToggleFavourite(s),
-  );
+  Widget _card(BuildContext context, int index) {
+    final session = sessions[index];
+    return SessionCard(
+      session: session,
+      onTap: () => onOpen(session),
+      onToggleFavourite: () => onToggleFavourite(session),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth >= gridBreakpoint) {
+        if (constraints.maxWidth >= 600) {
           return GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: maxCellWidth,
-              // A grid cell needs a height; this fits two title lines.
-              mainAxisExtent: 128,
+              maxCrossAxisExtent: 360, // a cell is never wider than 360
+              mainAxisExtent: 128, // a cell needs a height: two title lines
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
             ),
             itemCount: sessions.length,
-            itemBuilder: (context, i) => _card(sessions[i]),
+            itemBuilder: _card,
           );
         }
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 88),
           itemCount: sessions.length,
-          separatorBuilder: (context, i) => const SizedBox(height: 4),
-          itemBuilder: (context, i) => _card(sessions[i]),
+          separatorBuilder: (context, index) => const SizedBox(height: 4),
+          itemBuilder: _card,
         );
       },
     );

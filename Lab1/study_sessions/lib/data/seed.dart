@@ -4,8 +4,11 @@ import '../models/subject.dart';
 /// Twelve sessions with dates relative to today, so the app never goes stale.
 List<StudySession> seedSessions() {
   final now = DateTime.now();
-  DateTime day(int offset, int hour, [int minute = 0]) =>
-      DateTime(now.year, now.month, now.day + offset, hour, minute);
+
+  // day(2, 18) = the day after tomorrow at 18:00.
+  DateTime day(int daysFromToday, int hour, {int minute = 0}) {
+    return DateTime(now.year, now.month, now.day + daysFromToday, hour, minute);
+  }
 
   return [
     // 60-character title: must wrap to two lines without stripes.
@@ -68,7 +71,7 @@ List<StudySession> seedSessions() {
       id: 's6',
       title: 'Figma basics for developers',
       subject: Subject.design,
-      startsAt: day(4, 15, 30),
+      startsAt: day(4, 15, minute: 30),
       place: 'Design lab, room 210',
       capacity: 6,
       members: const ['Kamila', 'Zhanel', 'Timur'],
@@ -132,7 +135,7 @@ List<StudySession> seedSessions() {
       id: 's12',
       title: 'Personal finance for students',
       subject: Subject.economics,
-      startsAt: day(10, 18, 30),
+      startsAt: day(10, 18, minute: 30),
       place: 'https://meet.google.com/kbt-money-12',
       capacity: 100,
       isOnline: true,

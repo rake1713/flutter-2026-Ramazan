@@ -4,11 +4,11 @@ import '../models/study_session.dart';
 import '../models/subject.dart';
 import '../utils/format.dart';
 
-/// New and edit in one screen. Takes a session or null; pops a session.
+/// One screen for New and Edit. Gets a session or null, pops a session.
 class SessionFormScreen extends StatefulWidget {
-  const SessionFormScreen({super.key, this.session});
-
   final StudySession? session;
+
+  const SessionFormScreen({super.key, this.session});
 
   @override
   State<SessionFormScreen> createState() => _SessionFormScreenState();
@@ -17,47 +17,57 @@ class SessionFormScreen extends StatefulWidget {
 class _SessionFormScreenState extends State<SessionFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  /// What the form opened with; _dirty compares against it.
-  late final StudySession _initial = widget.session ?? StudySession.empty();
-  late final bool _isNew = widget.session == null;
-  late final Subject? _initialSubject = widget.session?.subject;
-  late final DateTime? _initialDate = widget.session?.startsAt;
-  late final TimeOfDay? _initialTime = switch (widget.session) {
-    final s? => TimeOfDay.fromDateTime(s.startsAt),
-    null => null,
-  };
+  // Controllers and focus nodes: fields of State, created once, disposed.
+  final _titleController = TextEditingController();
+  final _placeController = TextEditingController();
+  final _capacityController = TextEditingController();
+  final _agendaController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
 
-  late final _titleController = TextEditingController(text: _initial.title);
-  late final _placeController = TextEditingController(text: _initial.place);
-  late final _capacityController = TextEditingController(
-    text: '${_initial.capacity}',
-  );
-  late final _agendaController = TextEditingController(
-    text: _initial.agenda ?? '',
-  );
-  late final _dateController = TextEditingController(
-    text: switch (_initialDate) {
-      final d? => formatDate(d),
-      null => '',
-    },
-  );
-  late final _timeController = TextEditingController(
-    text: switch (_initialDate) {
-      final d? => formatTime(d),
-      null => '',
-    },
-  );
-
-  final _titleFocus = FocusNode();
   final _placeFocus = FocusNode();
   final _capacityFocus = FocusNode();
   final _agendaFocus = FocusNode();
 
-  late Subject? _subject = _initialSubject;
-  late bool _isOnline = _initial.isOnline;
-  late DateTime? _date = _initialDate;
-  late TimeOfDay? _time = _initialTime;
+  /// What the form opened with. _dirty compares against it.
+  late final StudySession _initial;
+  late final bool _isNew;
+  Subject? _initialSubject;
+  DateTime? _initialDate;
+  TimeOfDay? _initialTime;
+
+  // Values that are not text.
+  Subject? _subject;
+  bool _isOnline = false;
+  DateTime? _date;
+  TimeOfDay? _time;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final session = widget.session;
+    _isNew = session == null;
+    _initial = session ?? StudySession.empty();
+
+    if (session != null) {
+      _initialSubject = session.subject;
+      _initialDate = session.startsAt;
+      _initialTime = TimeOfDay.fromDateTime(session.startsAt);
+      _dateController.text = formatDate(session.startsAt);
+      _timeController.text = formatTime(session.startsAt);
+    }
+
+    _titleController.text = _initial.title;
+    _placeController.text = _initial.place;
+    _capacityController.text = '${_initial.capacity}';
+    _agendaController.text = _initial.agenda ?? '';
+
+    _subject = _initialSubject;
+    _isOnline = _initial.isOnline;
+    _date = _initialDate;
+    _time = _initialTime;
+  }
 
   @override
   void dispose() {
@@ -67,70 +77,75 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
     _agendaController.dispose();
     _dateController.dispose();
     _timeController.dispose();
-    _titleFocus.dispose();
     _placeFocus.dispose();
     _capacityFocus.dispose();
     _agendaFocus.dispose();
     super.dispose();
   }
 
-  /// The date and the time as one DateTime, or null while one is missing.
-  DateTime? get _startsAt => _startsAtOf(_date, _time);
+  /// Date + time as one DateTime, or null while one of them is missing.
+  DateTime? _combine(DateTime? date, TimeOfDay? time) {
+    if (date == null || time == null) return null;
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
 
-  /// Current values differ from the ones the form opened with.
-  bool get _dirty =>
-      _titleController.text != _initial.title ||
-      _placeController.text != _initial.place ||
-      _capacityController.text != '${_initial.capacity}' ||
-      _agendaController.text != (_initial.agenda ?? '') ||
-      _subject != _initialSubject ||
-      _isOnline != _initial.isOnline ||
-      _startsAt != _startsAtOf(_initialDate, _initialTime);
+  /// True when something differs from the values the form opened with.
+  bool get _dirty {
+    return _titleController.text != _initial.title ||
+        _placeController.text != _initial.place ||
+        _capacityController.text != '${_initial.capacity}' ||
+        _agendaController.text != (_initial.agenda ?? '') ||
+        _subject != _initialSubject ||
+        _isOnline != _initial.isOnline ||
+        _combine(_date, _time) != _combine(_initialDate, _initialTime);
+  }
 
-  static DateTime? _startsAtOf(DateTime? d, TimeOfDay? t) => switch ((d, t)) {
-    (final d?, final t?) => DateTime(d.year, d.month, d.day, t.hour, t.minute),
-    _ => null,
-  };
+  void _hideKeyboard(PointerDownEvent event) {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
 
-  // ---------- validators ----------
+  // ---------- validators: text in, error or null out ----------
 
-  String? _validateTitle(String? value) {
-    final length = value?.trim().length ?? 0;
+  String? _validateTitle(String? v) {
+    final length = (v ?? '').trim().length;
     if (length < 3) return 'At least 3 characters';
     if (length > 60) return 'At most 60 characters';
     return null;
   }
 
-  String? _validatePlace(String? value) {
-    final text = value?.trim() ?? '';
+  String? _validatePlace(String? v) {
+    final text = (v ?? '').trim();
     if (text.isEmpty) return _isOnline ? 'Enter a link' : 'Enter a room';
     if (_isOnline && !text.contains('://')) return 'A link contains ://';
     return null;
   }
 
-  String? _validateCapacity(String? value) {
-    final number = int.tryParse(value?.trim() ?? '');
+  String? _validateCapacity(String? v) {
+    final number = int.tryParse((v ?? '').trim());
     if (number == null) return 'Enter a whole number';
     if (number < 1 || number > 500) return 'From 1 to 500';
     if (number < _initial.count) return '${_initial.count} already joined';
     return null;
   }
 
-  String? _validateSubject(Subject? value) =>
-      value == null ? 'Choose a subject' : null;
+  String? _validateSubject(Subject? v) {
+    return v == null ? 'Choose a subject' : null;
+  }
 
-  String? _validateDate(String? _) => _date == null ? 'Pick a date' : null;
+  String? _validateDate(String? v) {
+    return _date == null ? 'Pick a date' : null;
+  }
 
-  String? _validateTime(String? _) {
+  String? _validateTime(String? v) {
     if (_time == null) return 'Pick a time';
-    final startsAt = _startsAt;
-    if (_isNew && startsAt != null && !startsAt.isAfter(DateTime.now())) {
+    final startsAt = _combine(_date, _time);
+    if (_isNew && startsAt != null && startsAt.isBefore(DateTime.now())) {
       return 'Must be in the future';
     }
     return null;
   }
 
-  // ---------- pickers ----------
+  // ---------- pickers: Cancel returns null and keeps the old value ----------
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -140,7 +155,7 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 1, 12, 31),
     );
-    if (picked == null || !mounted) return; // Cancel keeps the old value
+    if (picked == null || !mounted) return;
     setState(() {
       _date = picked;
       _dateController.text = formatDate(picked);
@@ -152,7 +167,7 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
       context: context,
       initialTime: _time ?? TimeOfDay.now(),
     );
-    if (picked == null || !mounted) return; // Cancel keeps the old value
+    if (picked == null || !mounted) return;
     setState(() {
       _time = picked;
       _timeController.text = formatTime(
@@ -164,34 +179,33 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
   // ---------- save and leave ----------
 
   Future<void> _save() async {
-    final valid = _formKey.currentState?.validate() ?? false;
+    // ! is safe: the Form is already built when the button is pressed.
+    if (!_formKey.currentState!.validate()) return;
     final subject = _subject;
-    final startsAt = _startsAt;
-    // The validators already reject a missing subject, date or time.
-    if (!valid || subject == null || startsAt == null) return;
+    final startsAt = _combine(_date, _time);
+    if (subject == null || startsAt == null) return; // validators said so
 
     setState(() => _saving = true);
-    await Future<void>.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1)); // pretend to save
     if (!mounted) return;
 
     final agenda = _agendaController.text.trim();
-    Navigator.of(context).pop(
-      StudySession(
-        id: _isNew ? '${DateTime.now().microsecondsSinceEpoch}' : _initial.id,
-        title: _titleController.text.trim(),
-        subject: subject,
-        startsAt: startsAt,
-        place: _placeController.text.trim(),
-        capacity: int.parse(_capacityController.text.trim()),
-        members: _initial.members,
-        isOnline: _isOnline,
-        agenda: agenda.isEmpty ? null : agenda,
-        isFavourite: _initial.isFavourite,
-      ),
+    final session = StudySession(
+      id: _isNew ? '${DateTime.now().microsecondsSinceEpoch}' : _initial.id,
+      title: _titleController.text.trim(),
+      subject: subject,
+      startsAt: startsAt,
+      place: _placeController.text.trim(),
+      capacity: int.parse(_capacityController.text.trim()),
+      members: _initial.members,
+      isOnline: _isOnline,
+      agenda: agenda.isEmpty ? null : agenda,
+      isFavourite: _initial.isFavourite,
     );
+    Navigator.of(context).pop(session);
   }
 
-  Future<void> _confirmDiscard() async {
+  Future<void> _askDiscard() async {
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -208,26 +222,26 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
         ],
       ),
     );
-    if (discard != true || !mounted) return;
-    Navigator.of(context).pop();
+    if (discard == true && mounted) {
+      Navigator.of(context).pop();
+    }
   }
-
-  void _hideKeyboard(PointerDownEvent _) => FocusScope.of(context).unfocus();
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_dirty,
-      onPopInvokedWithResult: (didPop, _) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        _confirmDiscard();
+        _askDiscard();
       },
       child: Scaffold(
         appBar: AppBar(title: Text(_isNew ? 'New session' : 'Edit session')),
         body: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          onChanged: () => setState(() {}), // re-evaluate _dirty
+          // Any field changed: rebuild, so canPop sees the new _dirty.
+          onChanged: () => setState(() {}),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -235,10 +249,8 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
               children: [
                 TextFormField(
                   controller: _titleController,
-                  focusNode: _titleFocus,
                   decoration: const InputDecoration(labelText: 'Title'),
                   maxLength: 60,
-                  textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => _placeFocus.requestFocus(),
                   onTapOutside: _hideKeyboard,
@@ -308,12 +320,12 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _dateController,
-                        readOnly: true,
+                        readOnly: true, // no keyboard, tap opens the picker
+                        onTap: _pickDate,
                         decoration: const InputDecoration(
                           labelText: 'Date',
                           prefixIcon: Icon(Icons.calendar_today),
                         ),
-                        onTap: _pickDate,
                         validator: _validateDate,
                       ),
                     ),
@@ -322,11 +334,11 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
                       child: TextFormField(
                         controller: _timeController,
                         readOnly: true,
+                        onTap: _pickTime,
                         decoration: const InputDecoration(
                           labelText: 'Time',
                           prefixIcon: Icon(Icons.schedule),
                         ),
-                        onTap: _pickTime,
                         validator: _validateTime,
                       ),
                     ),
@@ -342,17 +354,17 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
                   ),
                   minLines: 1,
                   maxLines: 4,
-                  keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _agendaFocus.unfocus(),
+                  onFieldSubmitted: (_) => _save(),
                   onTapOutside: _hideKeyboard,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 24), // not a Spacer: we are scrolling
                 FilledButton(
                   onPressed: _saving ? null : _save,
                   child: _saving
-                      ? const SizedBox.square(
-                          dimension: 20,
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text('Save'),

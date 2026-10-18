@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'models/profile.dart';
 import 'models/study_session.dart';
 
@@ -9,8 +7,14 @@ abstract final class Routes {
   static const form = '/session/form';
 }
 
-/// What the detail screen needs: the session and how to report changes up.
+/// What the detail screen gets: the session and callbacks to the shell.
 class DetailArgs {
+  final StudySession session;
+  final Profile profile;
+  final void Function(StudySession) onChanged;
+  final void Function(StudySession) onDelete;
+  final void Function() onOpenProfile;
+
   const DetailArgs({
     required this.session,
     required this.profile,
@@ -18,17 +22,11 @@ class DetailArgs {
     required this.onDelete,
     required this.onOpenProfile,
   });
-
-  final StudySession session;
-  final Profile profile;
-  final ValueChanged<StudySession> onChanged;
-  final ValueChanged<StudySession> onDelete;
-  final VoidCallback onOpenProfile;
 }
 
-/// The form edits [session], or creates a new one when it is null.
+/// What the form gets: a session to edit, or null for a new one.
 class FormArgs {
-  const FormArgs({this.session});
-
   final StudySession? session;
+
+  const FormArgs({this.session});
 }

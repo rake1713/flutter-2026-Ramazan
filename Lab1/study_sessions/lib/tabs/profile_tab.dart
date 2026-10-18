@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 import '../models/profile.dart';
 import '../models/study_session.dart';
 
-/// Tab 3: name, group and the theme. Everything goes up through callbacks.
+/// Tab 3: name, group and the theme. Changes go up through callbacks.
 class ProfileTab extends StatefulWidget {
+  final Profile profile;
+  final List<StudySession> sessions;
+  final ThemeMode themeMode;
+  final void Function(Profile) onProfileChanged;
+  final void Function(ThemeMode) onThemeModeChanged;
+
   const ProfileTab({
     super.key,
     required this.profile,
@@ -14,29 +20,29 @@ class ProfileTab extends StatefulWidget {
     required this.onThemeModeChanged,
   });
 
-  final Profile profile;
-  final List<StudySession> sessions;
-  final ThemeMode themeMode;
-  final ValueChanged<Profile> onProfileChanged;
-  final ValueChanged<ThemeMode> onThemeModeChanged;
-
   @override
   State<ProfileTab> createState() => _ProfileTabState();
 }
 
 class _ProfileTabState extends State<ProfileTab> {
-  static final _groupPattern = RegExp(r'^[A-Z]{2,4}-\d{4}$');
-
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.profile.name);
-  late final _groupController = TextEditingController(
-    text: widget.profile.group,
-  );
+  final _nameController = TextEditingController();
+  final _groupController = TextEditingController();
+
+  /// Like IT-2302: 2–4 capital letters, a dash, 4 digits.
+  final _groupPattern = RegExp(r'^[A-Z]{2,4}-\d{4}$');
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = widget.profile.name;
+    _groupController.text = widget.profile.group;
+  }
 
   @override
   void didUpdateWidget(ProfileTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reset data replaces the profile from above: show the new values.
+    // Reset data gives us a new empty profile: show it in the fields.
     if (widget.profile != oldWidget.profile) {
       _nameController.text = widget.profile.name;
       _groupController.text = widget.profile.group;
@@ -50,17 +56,20 @@ class _ProfileTabState extends State<ProfileTab> {
     super.dispose();
   }
 
-  String? _validateName(String? value) =>
-      (value?.trim().isEmpty ?? true) ? 'Enter your name' : null;
-
-  String? _validateGroup(String? value) {
-    final text = value?.trim() ?? '';
-    if (text.isEmpty) return null; // the group is optional
-    return _groupPattern.hasMatch(text) ? null : 'Like IT-2302';
+  String? _validateName(String? v) {
+    return (v ?? '').trim().isEmpty ? 'Enter your name' : null;
   }
 
-  void _save(String _) {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+  String? _validateGroup(String? v) {
+    final text = (v ?? '').trim();
+    if (text.isEmpty) return null; // the group is optional
+    if (!_groupPattern.hasMatch(text)) return 'Like IT-2302';
+    return null;
+  }
+
+  void _save(String value) {
+    // ! is safe: the Form is already built when a field is submitted.
+    if (!_formKey.currentState!.validate()) return;
     widget.onProfileChanged(
       Profile(
         name: _nameController.text.trim(),
@@ -69,18 +78,21 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
-  String _label(ThemeMode mode) => switch (mode) {
-    ThemeMode.system => 'System',
-    ThemeMode.light => 'Light',
-    ThemeMode.dark => 'Dark',
-  };
+  String _themeLabel(ThemeMode mode) {
+    return switch (mode) {
+      ThemeMode.system => 'System',
+      ThemeMode.light => 'Light',
+      ThemeMode.dark => 'Dark',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     final name = widget.profile.name;
+    // Counted again on every build, from the list itself.
     final lists = widget.sessions.fold(
       0,
-      (n, s) => s.contains(name) ? n + 1 : n,
+      (count, s) => s.contains(name) ? count + 1 : count,
     );
     final textTheme = Theme.of(context).textTheme;
 
@@ -97,9 +109,9 @@ class _ProfileTabState extends State<ProfileTab> {
               helperText: 'Press Enter to save',
               prefixIcon: Icon(Icons.person),
             ),
-            textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            onTapOutside: (_) => FocusScope.of(context).unfocus(),
+            onTapOutside: (event) =>
+                FocusManager.instance.primaryFocus?.unfocus(),
             onFieldSubmitted: _save,
             validator: _validateName,
           ),
@@ -111,9 +123,9 @@ class _ProfileTabState extends State<ProfileTab> {
               helperText: 'Press Enter to save',
               prefixIcon: Icon(Icons.groups),
             ),
-            textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.done,
-            onTapOutside: (_) => FocusScope.of(context).unfocus(),
+            onTapOutside: (event) =>
+                FocusManager.instance.primaryFocus?.unfocus(),
             onFieldSubmitted: _save,
             validator: _validateGroup,
           ),
@@ -132,7 +144,7 @@ class _ProfileTabState extends State<ProfileTab> {
             children: [
               for (final mode in ThemeMode.values)
                 ChoiceChip(
-                  label: Text(_label(mode)),
+                  label: Text(_themeLabel(mode)),
                   selected: widget.themeMode == mode,
                   onSelected: (_) => widget.onThemeModeChanged(mode),
                 ),

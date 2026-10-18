@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
 
-/// An icon on the left, a title and an optional subtitle.
-/// Our own row instead of ListTile, so the project needs no leading parameter.
+/// A row: icon on the left, a title and an optional subtitle.
+/// Like ListTile, but without a leading parameter.
 class InfoTile extends StatelessWidget {
+  final Widget icon;
+  final String title;
+  final String? subtitle;
+  final bool highlighted;
+  final VoidCallback? onTap;
+
   const InfoTile({
     super.key,
     required this.icon,
     required this.title,
     this.subtitle,
-    this.selected = false,
+    this.highlighted = false,
     this.onTap,
   });
 
-  final Widget icon;
-  final String title;
-  final String? subtitle;
-  final bool selected;
-  final VoidCallback? onTap;
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = selected ? theme.colorScheme.primary : null;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final sub = subtitle;
+
     return InkWell(
       onTap: onTap,
-      child: Container(
-        color: selected ? theme.colorScheme.primaryContainer : null,
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            IconTheme.merge(
-              data: IconThemeData(color: color),
-              child: icon,
-            ),
+            icon,
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -40,16 +38,16 @@ class InfoTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: color,
-                      fontWeight: selected ? FontWeight.bold : null,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: highlighted ? colorScheme.primary : null,
+                      fontWeight: highlighted ? FontWeight.bold : null,
                     ),
                   ),
-                  if (subtitle case final text?)
+                  if (sub != null)
                     Text(
-                      text,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      sub,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                 ],

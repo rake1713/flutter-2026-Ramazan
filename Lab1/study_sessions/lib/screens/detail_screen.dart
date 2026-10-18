@@ -10,9 +10,13 @@ import '../utils/format.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/info_tile.dart';
 
-enum _MenuAction { edit, delete }
-
 class DetailScreen extends StatefulWidget {
+  final StudySession session;
+  final Profile profile;
+  final void Function(StudySession) onChanged;
+  final void Function(StudySession) onDelete;
+  final void Function() onOpenProfile;
+
   const DetailScreen({
     super.key,
     required this.session,
@@ -22,12 +26,6 @@ class DetailScreen extends StatefulWidget {
     required this.onOpenProfile,
   });
 
-  final StudySession session;
-  final Profile profile;
-  final ValueChanged<StudySession> onChanged;
-  final ValueChanged<StudySession> onDelete;
-  final VoidCallback onOpenProfile;
-
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
@@ -35,26 +33,26 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   late StudySession _session = widget.session;
   DateTime _now = DateTime.now();
-  late final Timer _timer;
-
-  String get _me => widget.profile.name;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(
-      const Duration(minutes: 1),
-      (_) => setState(() => _now = DateTime.now()),
-    );
+    // Once a minute: the countdown text changes.
+    _timer = Timer.periodic(const Duration(minutes: 1), (t) {
+      setState(() => _now = DateTime.now());
+    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
-  /// Keep our copy and tell the shell, which owns the list.
+  String get _myName => widget.profile.name;
+
+  /// Keep our copy for this screen and tell the shell, which owns the list.
   void _update(StudySession session) {
     setState(() => _session = session);
     widget.onChanged(session);
@@ -65,20 +63,11 @@ class _DetailScreenState extends State<DetailScreen> {
     widget.onOpenProfile();
   }
 
-  Future<void> _join() async {
-    if (_me.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Enter your name in Profile first'),
-          action: SnackBarAction(label: 'Profile', onPressed: _openProfile),
-        ),
-      );
-      return;
-    }
-    final ok = await showDialog<bool>(
+  Future<bool> _ask(String title, String yes) async {
+    final answer = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Join this session?'),
+        title: Text(title),
         content: Text(_session.title),
         actions: [
           TextButton(
@@ -87,21 +76,32 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Join'),
+            child: Text(yes),
           ),
         ],
       ),
     );
-    if (ok != true || !mounted) return;
-    _update(_session.copyWith(members: [..._session.members, _me]));
+    return answer == true;
+  }
+
+  Future<void> _join() async {
+    if (_myName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Enter your name in Profile first'),
+          action: SnackBarAction(label: 'Profile', onPressed: _openProfile),
+        ),
+      );
+      return;
+    }
+    final ok = await _ask('Join this session?', 'Join');
+    if (!ok || !mounted) return;
+    _update(_session.copyWith(members: [..._session.members, _myName]));
   }
 
   void _leave() {
-    _update(
-      _session.copyWith(
-        members: _session.members.where((m) => m != _me).toList(),
-      ),
-    );
+    final others = _session.members.where((m) => m != _myName).toList();
+    _update(_session.copyWith(members: others));
   }
 
   Future<void> _edit() async {
@@ -114,35 +114,14 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _delete() async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete this session?'),
-        content: Text(_session.title),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !mounted) return;
+    final ok = await _ask('Delete this session?', 'Delete');
+    if (!ok || !mounted) return;
     widget.onDelete(_session);
     Navigator.of(context).pop();
   }
 
-  void _onMenu(_MenuAction action) => switch (action) {
-    _MenuAction.edit => _edit(),
-    _MenuAction.delete => _delete(),
-  };
-
   Widget _primaryButton() {
-    if (_session.contains(_me)) {
+    if (_session.contains(_myName)) {
       return OutlinedButton.icon(
         onPressed: _leave,
         icon: const Icon(Icons.logout),
@@ -151,7 +130,7 @@ class _DetailScreenState extends State<DetailScreen> {
     }
     final canJoin = !_session.isFull && !_session.isPast;
     return FilledButton.icon(
-      onPressed: canJoin ? _join : null,
+      onPressed: canJoin ? _join : null, // null = disabled
       icon: const Icon(Icons.group_add),
       label: Text(_session.isFull ? 'Full' : 'Join'),
     );
@@ -159,36 +138,38 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final (:taken, free: _) = _session.places;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(_session.title, maxLines: 1),
           actions: [
-            PopupMenuButton<_MenuAction>(
-              onSelected: _onMenu,
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'edit') _edit();
+                if (value == 'delete') _delete();
+              },
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _MenuAction.edit, child: Text('Edit')),
-                PopupMenuItem(value: _MenuAction.delete, child: Text('Delete')),
+                PopupMenuItem(value: 'edit', child: Text('Edit')),
+                PopupMenuItem(value: 'delete', child: Text('Delete')),
               ],
             ),
           ],
         ),
         body: Column(
           children: [
-            _Header(session: _session, countdown: Countdown.of(_session, _now)),
+            _Header(session: _session, now: _now),
             TabBar(
               tabs: [
                 const Tab(text: 'About'),
-                Tab(text: 'Members ($taken)'),
+                Tab(text: 'Members (${_session.count})'),
               ],
             ),
             Expanded(
               child: TabBarView(
                 children: [
                   _AboutTab(session: _session),
-                  _MembersTab(session: _session, me: _me),
+                  _MembersTab(session: _session, myName: _myName),
                 ],
               ),
             ),
@@ -206,21 +187,23 @@ class _DetailScreenState extends State<DetailScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.session, required this.countdown});
-
   final StudySession session;
-  final Countdown countdown;
+  final DateTime now;
 
-  String get _countdownText => switch (countdown) {
-    Upcoming(:final left) => 'Starts in ${formatDuration(left)}',
-    Started(:final elapsed) => 'Started ${formatDuration(elapsed)} ago',
-    Ended() => 'Ended',
-  };
+  const _Header({required this.session, required this.now});
+
+  String _countdownText() {
+    return switch (countdownOf(session, now)) {
+      Upcoming(:var left) => 'Starts in ${formatDuration(left)}',
+      Started(:var elapsed) => 'Started ${formatDuration(elapsed)} ago',
+      Ended() => 'Ended',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AspectRatio(
       aspectRatio: 16 / 6,
       child: Stack(
@@ -230,8 +213,8 @@ class _Header extends StatelessWidget {
           Center(
             child: CircleAvatar(
               radius: 32,
-              backgroundColor: session.subject.color(scheme),
-              foregroundColor: scheme.onSurface,
+              backgroundColor: session.subject.color(colorScheme),
+              foregroundColor: colorScheme.onSurface,
               child: Icon(session.subject.icon, size: 32),
             ),
           ),
@@ -249,10 +232,13 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: scheme.surface,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(_countdownText, style: labelStyle),
+              child: Text(
+                _countdownText(),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
           ),
         ],
@@ -262,13 +248,15 @@ class _Header extends StatelessWidget {
 }
 
 class _AboutTab extends StatelessWidget {
-  const _AboutTab({required this.session});
-
   final StudySession session;
+
+  const _AboutTab({required this.session});
 
   @override
   Widget build(BuildContext context) {
     final (:taken, :free) = session.places;
+    final agenda = session.agenda;
+
     return ListView(
       children: [
         InfoTile(
@@ -286,7 +274,7 @@ class _AboutTab extends StatelessWidget {
           title: '$taken of ${session.capacity} places taken',
           subtitle: free > 0 ? '$free free' : 'No free places',
         ),
-        if (session.agenda case final agenda?)
+        if (agenda != null)
           InfoTile(
             icon: const Icon(Icons.notes),
             title: 'Agenda',
@@ -298,15 +286,14 @@ class _AboutTab extends StatelessWidget {
 }
 
 class _MembersTab extends StatelessWidget {
-  const _MembersTab({required this.session, required this.me});
-
   final StudySession session;
-  final String me;
+  final String myName;
+
+  const _MembersTab({required this.session, required this.myName});
 
   @override
   Widget build(BuildContext context) {
-    final members = session.members;
-    if (members.isEmpty) {
+    if (session.members.isEmpty) {
       return const EmptyState(
         icon: Icons.group_off,
         message: 'Nobody has joined yet',
@@ -314,11 +301,11 @@ class _MembersTab extends StatelessWidget {
     }
     return ListView(
       children: [
-        for (final name in members)
+        for (final name in session.members)
           InfoTile(
-            selected: name == me,
             icon: CircleAvatar(child: Text(name[0])),
-            title: name == me ? 'You' : name,
+            title: name == myName ? 'You' : name,
+            highlighted: name == myName,
           ),
       ],
     );

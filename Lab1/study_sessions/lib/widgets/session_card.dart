@@ -6,6 +6,10 @@ import 'session_avatar.dart';
 
 /// The one card used by the list, the grid and favourites.
 class SessionCard extends StatelessWidget {
+  final StudySession session;
+  final VoidCallback onTap;
+  final VoidCallback onToggleFavourite;
+
   const SessionCard({
     super.key,
     required this.session,
@@ -13,16 +17,19 @@ class SessionCard extends StatelessWidget {
     required this.onToggleFavourite,
   });
 
-  final StudySession session;
-  final VoidCallback onTap;
-  final VoidCallback onToggleFavourite;
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final greyText = textTheme.bodyMedium?.copyWith(
+      color: colorScheme.onSurfaceVariant,
     );
+
+    String date = formatDateTime(session.startsAt);
+    if (session.isPast) {
+      date = '$date · ended';
+    }
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -42,29 +49,22 @@ class SessionCard extends StatelessWidget {
                       session.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium,
+                      style: textTheme.titleMedium,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      session.isPast
-                          ? '${formatDateTime(session.startsAt)} · ended'
-                          : formatDateTime(session.startsAt),
-                      style: secondary,
-                    ),
+                    Text(date, style: greyText),
                     Text(
                       session.place,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: secondary,
+                      style: greyText,
                     ),
                   ],
                 ),
               ),
               IconButton(
                 onPressed: onToggleFavourite,
-                tooltip: session.isFavourite
-                    ? 'Remove from favourites'
-                    : 'Add to favourites',
+                tooltip: 'Favourite',
                 icon: Icon(
                   session.isFavourite ? Icons.favorite : Icons.favorite_border,
                 ),

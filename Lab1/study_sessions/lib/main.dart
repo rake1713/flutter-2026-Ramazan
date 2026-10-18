@@ -9,7 +9,7 @@ import 'shell.dart';
 
 void main() => runApp(const MyApp());
 
-/// Holds the theme mode above MaterialApp, so changing it rebuilds the theme.
+/// Stateful because it holds the theme mode, above MaterialApp.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -18,41 +18,48 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // The only colour literal in lib/: the seed every colour role comes from.
-  static const _seed = Colors.teal;
-
   ThemeMode _themeMode = ThemeMode.system;
 
-  void _setThemeMode(ThemeMode mode) => setState(() => _themeMode = mode);
+  void _setThemeMode(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+  }
 
-  Route<dynamic>? _generateRoute(RouteSettings settings) => switch (settings) {
-    RouteSettings(name: Routes.detail, arguments: final DetailArgs args) =>
-      MaterialPageRoute<void>(
-        settings: settings,
-        builder: (_) => DetailScreen(
-          session: args.session,
-          profile: args.profile,
-          onChanged: args.onChanged,
-          onDelete: args.onDelete,
-          onOpenProfile: args.onOpenProfile,
-        ),
-      ),
-    RouteSettings(name: Routes.form, arguments: final FormArgs args) =>
-      MaterialPageRoute<StudySession>(
-        settings: settings,
-        builder: (_) => SessionFormScreen(session: args.session),
-      ),
-    _ => null,
-  };
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case Routes.detail:
+        final args = settings.arguments as DetailArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => DetailScreen(
+            session: args.session,
+            profile: args.profile,
+            onChanged: args.onChanged,
+            onDelete: args.onDelete,
+            onOpenProfile: args.onOpenProfile,
+          ),
+        );
+      case Routes.form:
+        final args = settings.arguments as FormArgs;
+        return MaterialPageRoute<StudySession>(
+          settings: settings,
+          builder: (_) => SessionFormScreen(session: args.session),
+        );
+      default:
+        return null; // -> onUnknownRoute
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Study Sessions',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: _seed)),
+      // The only colour in lib/: the seed. Every other colour is a role.
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: _seed,
+          seedColor: Colors.teal,
           brightness: Brightness.dark,
         ),
       ),
@@ -62,11 +69,9 @@ class _MyAppState extends State<MyApp> {
         Routes.home: (_) =>
             Shell(themeMode: _themeMode, onThemeModeChanged: _setThemeMode),
       },
-      onGenerateRoute: _generateRoute,
-      onUnknownRoute: (settings) => MaterialPageRoute<void>(
-        settings: settings,
-        builder: (_) => const NotFoundScreen(),
-      ),
+      onGenerateRoute: _onGenerateRoute,
+      onUnknownRoute: (settings) =>
+          MaterialPageRoute(builder: (_) => const NotFoundScreen()),
     );
   }
 }
