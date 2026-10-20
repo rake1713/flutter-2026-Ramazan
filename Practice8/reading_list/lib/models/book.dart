@@ -11,7 +11,7 @@ class Book {
     : title = m['title'] as String,
       author = m['author'] as String,
       pages = m['pages'] as int,
-      year = m['year'] as int?, // a missing key stays null
+      year = m['year'] as int?,
       read = m['read'] as bool? ?? false;
 
   final String title;

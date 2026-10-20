@@ -45,7 +45,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
 
   String? _validateYear(String? v) {
     final text = (v ?? '').trim();
-    if (text.isEmpty) return null; // the year is optional
+    if (text.isEmpty) return null;
     final n = int.tryParse(text);
     final thisYear = DateTime.now().year;
     if (n == null || n < 1450 || n > thisYear) {
@@ -59,8 +59,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
     final book = Book(
       title: _title.text.trim(),
       author: _author.text.trim(),
-      pages: int.parse(_pages.text), // safe: the validator checked it
-      year: int.tryParse(_year.text.trim()), // '' -> null = year unknown
+      pages: int.parse(_pages.text),
+      year: int.tryParse(_year.text.trim()),
     );
     Navigator.of(context).pop(book);
   }

@@ -15,7 +15,7 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  final List<Book> _books = [...seed]; // a copy, the seed is never touched
+  final List<Book> _books = [...seed];
   Filter _filter = Filter.all;
 
   List<Book> get _visible => switch (_filter) {
@@ -37,7 +37,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (!mounted) return;
     switch (action) {
       case null:
-        return; // back arrow: nothing changes
+        return;
       case BookAction.toggleRead:
         setState(() => book.read = !book.read);
       case BookAction.delete:

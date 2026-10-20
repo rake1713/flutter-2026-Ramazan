@@ -4,8 +4,6 @@ import 'models/book.dart';
 
 enum BookAction { toggleRead, delete }
 
-/// Shows one book and answers with what the user decided.
-/// It never touches the list itself.
 class DetailScreen extends StatelessWidget {
   const DetailScreen({super.key, required this.book});
 
