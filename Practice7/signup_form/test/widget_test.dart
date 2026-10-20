@@ -7,7 +7,6 @@ void main() {
   testWidgets('empty form shows every error at once', (tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Sign up is disabled until the checkbox is ticked.
     final button = tester.widget<FilledButton>(find.byType(FilledButton));
     expect(button.onPressed, isNull);
 

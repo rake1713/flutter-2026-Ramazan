@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Shows the result of the sign-up. Asks about its own box (LayoutBuilder),
-/// not about the screen: two columns from 600 px, one column below.
 class SummaryCard extends StatelessWidget {
   const SummaryCard({
     super.key,
@@ -48,7 +46,6 @@ class SummaryCard extends StatelessWidget {
             return GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
-              // the page itself scrolls, the grid does not
               physics: const NeverScrollableScrollPhysics(),
               childAspectRatio: 4,
               children: tiles,

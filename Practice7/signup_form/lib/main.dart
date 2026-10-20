@@ -53,8 +53,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  // ---------- validators: text in, error or null out ----------
-
   String? _validateName(String? v) {
     return (v ?? '').trim().length < 2 ? 'At least 2 characters' : null;
   }
@@ -84,8 +82,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return _birth == null ? 'Pick your date of birth' : null;
   }
 
-  // ---------- date picker ----------
-
   String _formatDate(DateTime d) {
     final day = d.day.toString().padLeft(2, '0');
     final month = d.month.toString().padLeft(2, '0');
@@ -99,14 +95,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
-    if (picked == null || !mounted) return; // Cancel keeps the old date
+    if (picked == null || !mounted) return;
     setState(() {
       _birth = picked;
       _birthText.text = _formatDate(picked);
     });
   }
-
-  // ---------- buttons ----------
 
   void _signUp() {
     if (!_formKey.currentState!.validate()) return;
@@ -116,7 +110,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _startOver() {
-    // No _formKey.currentState here: the Form is not on screen now.
     setState(() {
       for (final c in [_name, _email, _password, _confirm, _birthText]) {
         c.clear();
@@ -128,8 +121,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _done = false;
     });
   }
-
-  // ---------- screens ----------
 
   Widget _buildForm() {
     return SingleChildScrollView(
@@ -182,7 +173,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: const InputDecoration(labelText: 'Confirm password'),
               obscureText: true,
               textInputAction: TextInputAction.done,
-              // Same as the button: null while the rules are not accepted.
               onFieldSubmitted: _agreed ? (_) => _signUp() : null,
               onTapOutside: _hideKeyboard,
               validator: _validateConfirm,
@@ -201,7 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _birthText,
-              readOnly: true, // no keyboard, a tap opens the picker
+              readOnly: true,
               onTap: _pickBirth,
               decoration: const InputDecoration(
                 labelText: 'Date of birth',
@@ -216,9 +206,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               value: _agreed,
               onChanged: (v) => setState(() => _agreed = v ?? false),
             ),
-            const SizedBox(height: 24), // not a Spacer: we are in a scroll view
+            const SizedBox(height: 24),
             FilledButton(
-              onPressed: _agreed ? _signUp : null, // null = grey, disabled
+              onPressed: _agreed ? _signUp : null,
               child: const Text('Sign up'),
             ),
           ],
