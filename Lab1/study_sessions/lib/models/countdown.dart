@@ -1,6 +1,5 @@
 import 'study_session.dart';
 
-/// Where a session is in time. Sealed, so a switch must cover all three.
 sealed class Countdown {
   const Countdown();
 }

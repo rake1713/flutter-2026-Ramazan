@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/study_session.dart';
 
-/// Subject icon in a circle with a badge: FULL, or "N left" when 5 or fewer.
 class SessionAvatar extends StatelessWidget {
   final StudySession session;
 

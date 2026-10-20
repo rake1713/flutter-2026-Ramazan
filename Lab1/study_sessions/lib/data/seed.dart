@@ -1,17 +1,14 @@
 import '../models/study_session.dart';
 import '../models/subject.dart';
 
-/// Twelve sessions with dates relative to today, so the app never goes stale.
 List<StudySession> seedSessions() {
   final now = DateTime.now();
 
-  // day(2, 18) = the day after tomorrow at 18:00.
   DateTime day(int daysFromToday, int hour, {int minute = 0}) {
     return DateTime(now.year, now.month, now.day + daysFromToday, hour, minute);
   }
 
   return [
-    // 60-character title: must wrap to two lines without stripes.
     StudySession(
       id: 's1',
       title: 'Linear Algebra Marathon: Eigenvalues, SVD and Midterm Review',
@@ -23,7 +20,6 @@ List<StudySession> seedSessions() {
       agenda: 'Eigenvalues, diagonalisation, SVD. Bring last year\'s exam.',
       isFavourite: true,
     ),
-    // At its limit: FULL badge, Join disabled.
     StudySession(
       id: 's2',
       title: 'Flutter state management clinic',
@@ -34,7 +30,6 @@ List<StudySession> seedSessions() {
       members: const ['Alikhan', 'Zhanel', 'Kamila', 'Yerlan'],
       agenda: 'setState vs. lifting state up, with your own lab code.',
     ),
-    // Past: shown last, only with the Past filter.
     StudySession(
       id: 's3',
       title: 'Physics 2: electromagnetism problems',
@@ -45,7 +40,6 @@ List<StudySession> seedSessions() {
       members: const ['Dana', 'Timur', 'Asel'],
       agenda: 'Maxwell equations, problem set 6.',
     ),
-    // Mode on: the place is a link.
     StudySession(
       id: 's4',
       title: 'IELTS speaking practice',
@@ -57,7 +51,6 @@ List<StudySession> seedSessions() {
       isOnline: true,
       agenda: 'Part 2 cue cards, two minutes each, feedback in pairs.',
     ),
-    // No optional text.
     StudySession(
       id: 's5',
       title: 'Microeconomics midterm review',
@@ -78,7 +71,6 @@ List<StudySession> seedSessions() {
       agenda: 'Frames, auto layout and handing a design to Flutter.',
       isFavourite: true,
     ),
-    // Started half an hour ago: the countdown shows Started.
     StudySession(
       id: 's7',
       title: 'Dart records and patterns',

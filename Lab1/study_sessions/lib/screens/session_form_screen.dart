@@ -4,7 +4,6 @@ import '../models/study_session.dart';
 import '../models/subject.dart';
 import '../utils/format.dart';
 
-/// One screen for New and Edit. Gets a session or null, pops a session.
 class SessionFormScreen extends StatefulWidget {
   final StudySession? session;
 
@@ -17,7 +16,6 @@ class SessionFormScreen extends StatefulWidget {
 class _SessionFormScreenState extends State<SessionFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers and focus nodes: fields of State, created once, disposed.
   final _titleController = TextEditingController();
   final _placeController = TextEditingController();
   final _capacityController = TextEditingController();
@@ -29,14 +27,12 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
   final _capacityFocus = FocusNode();
   final _agendaFocus = FocusNode();
 
-  /// What the form opened with. _dirty compares against it.
   late final StudySession _initial;
   late final bool _isNew;
   Subject? _initialSubject;
   DateTime? _initialDate;
   TimeOfDay? _initialTime;
 
-  // Values that are not text.
   Subject? _subject;
   bool _isOnline = false;
   DateTime? _date;
@@ -83,13 +79,11 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
     super.dispose();
   }
 
-  /// Date + time as one DateTime, or null while one of them is missing.
   DateTime? _combine(DateTime? date, TimeOfDay? time) {
     if (date == null || time == null) return null;
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
-  /// True when something differs from the values the form opened with.
   bool get _dirty {
     return _titleController.text != _initial.title ||
         _placeController.text != _initial.place ||
@@ -103,8 +97,6 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
   void _hideKeyboard(PointerDownEvent event) {
     FocusManager.instance.primaryFocus?.unfocus();
   }
-
-  // ---------- validators: text in, error or null out ----------
 
   String? _validateTitle(String? v) {
     final length = (v ?? '').trim().length;
@@ -145,8 +137,6 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
     return null;
   }
 
-  // ---------- pickers: Cancel returns null and keeps the old value ----------
-
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -176,17 +166,15 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
     });
   }
 
-  // ---------- save and leave ----------
-
   Future<void> _save() async {
     // ! is safe: the Form is already built when the button is pressed.
     if (!_formKey.currentState!.validate()) return;
     final subject = _subject;
     final startsAt = _combine(_date, _time);
-    if (subject == null || startsAt == null) return; // validators said so
+    if (subject == null || startsAt == null) return;
 
     setState(() => _saving = true);
-    await Future.delayed(const Duration(seconds: 1)); // pretend to save
+    await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
 
     final agenda = _agendaController.text.trim();
@@ -240,7 +228,6 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
         body: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          // Any field changed: rebuild, so canPop sees the new _dirty.
           onChanged: () => setState(() {}),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -320,7 +307,7 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _dateController,
-                        readOnly: true, // no keyboard, tap opens the picker
+                        readOnly: true,
                         onTap: _pickDate,
                         decoration: const InputDecoration(
                           labelText: 'Date',
@@ -358,7 +345,7 @@ class _SessionFormScreenState extends State<SessionFormScreen> {
                   onFieldSubmitted: (_) => _save(),
                   onTapOutside: _hideKeyboard,
                 ),
-                const SizedBox(height: 24), // not a Spacer: we are scrolling
+                const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _saving ? null : _save,
                   child: _saving

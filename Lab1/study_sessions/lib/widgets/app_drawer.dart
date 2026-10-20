@@ -27,7 +27,7 @@ class AppDrawer extends StatelessWidget {
             icon: const Icon(Icons.info_outline),
             title: 'About',
             onTap: () {
-              Navigator.pop(context); // close the drawer first
+              Navigator.pop(context);
               onAbout();
             },
           ),

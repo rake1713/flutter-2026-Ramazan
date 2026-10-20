@@ -4,13 +4,11 @@ import '../models/study_session.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/session_list.dart';
 
-/// Tab 2: only the favourites. Same card, same list.
 class FavouritesTab extends StatelessWidget {
   final List<StudySession> sessions;
   final void Function(StudySession) onOpen;
   final void Function(StudySession) onToggleFavourite;
 
-  /// Asks the shell to switch to the first tab.
   final VoidCallback onBrowse;
 
   const FavouritesTab({

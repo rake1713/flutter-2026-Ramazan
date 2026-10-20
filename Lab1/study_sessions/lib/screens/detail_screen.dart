@@ -38,7 +38,6 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Once a minute: the countdown text changes.
     _timer = Timer.periodic(const Duration(minutes: 1), (t) {
       setState(() => _now = DateTime.now());
     });
@@ -52,7 +51,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   String get _myName => widget.profile.name;
 
-  /// Keep our copy for this screen and tell the shell, which owns the list.
   void _update(StudySession session) {
     setState(() => _session = session);
     widget.onChanged(session);
@@ -130,7 +128,7 @@ class _DetailScreenState extends State<DetailScreen> {
     }
     final canJoin = !_session.isFull && !_session.isPast;
     return FilledButton.icon(
-      onPressed: canJoin ? _join : null, // null = disabled
+      onPressed: canJoin ? _join : null,
       icon: const Icon(Icons.group_add),
       label: Text(_session.isFull ? 'Full' : 'Join'),
     );

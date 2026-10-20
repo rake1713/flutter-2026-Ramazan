@@ -9,8 +9,6 @@ import 'tabs/profile_tab.dart';
 import 'tabs/sessions_tab.dart';
 import 'widgets/app_drawer.dart';
 
-/// The home screen with three tabs. It owns the sessions, the profile and
-/// the selected tab. Tabs get data in constructors and call back up.
 class Shell extends StatefulWidget {
   final ThemeMode themeMode;
   final void Function(ThemeMode) onThemeModeChanged;
@@ -30,13 +28,10 @@ class _ShellState extends State<Shell> {
   Profile _profile = const Profile.empty();
   int _tab = 0;
 
-  // ---------- callbacks for tabs and pushed screens ----------
-
   void _goToTab(int index) {
     setState(() => _tab = index);
   }
 
-  /// Put the changed session in place of the old one with the same id.
   void _replace(StudySession changed) {
     final newList = _sessions
         .map((s) => s.id == changed.id ? changed : s)
@@ -57,8 +52,6 @@ class _ShellState extends State<Shell> {
     setState(() => _profile = profile);
   }
 
-  // ---------- navigation ----------
-
   void _open(StudySession session) {
     Navigator.of(context).pushNamed(
       Routes.detail,
@@ -78,8 +71,6 @@ class _ShellState extends State<Shell> {
     if (created == null || !mounted) return;
     setState(() => _sessions = [..._sessions, created]);
   }
-
-  // ---------- drawer ----------
 
   void _showAbout() {
     showDialog(
@@ -134,7 +125,6 @@ class _ShellState extends State<Shell> {
     return Scaffold(
       appBar: AppBar(title: Text(titles[_tab])),
       drawer: AppDrawer(onAbout: _showAbout, onReset: _resetData),
-      // IndexedStack keeps every tab alive, so the search text survives.
       body: IndexedStack(
         index: _tab,
         children: [

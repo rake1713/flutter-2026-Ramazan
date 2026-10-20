@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// One look for every "nothing here": no match, no favourites, no members.
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String message;

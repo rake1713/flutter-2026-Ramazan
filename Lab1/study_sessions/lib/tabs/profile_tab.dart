@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/profile.dart';
 import '../models/study_session.dart';
 
-/// Tab 3: name, group and the theme. Changes go up through callbacks.
 class ProfileTab extends StatefulWidget {
   final Profile profile;
   final List<StudySession> sessions;
@@ -29,7 +28,6 @@ class _ProfileTabState extends State<ProfileTab> {
   final _nameController = TextEditingController();
   final _groupController = TextEditingController();
 
-  /// Like IT-2302: 2–4 capital letters, a dash, 4 digits.
   final _groupPattern = RegExp(r'^[A-Z]{2,4}-\d{4}$');
 
   @override
@@ -42,7 +40,6 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   void didUpdateWidget(ProfileTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reset data gives us a new empty profile: show it in the fields.
     if (widget.profile != oldWidget.profile) {
       _nameController.text = widget.profile.name;
       _groupController.text = widget.profile.group;
@@ -62,7 +59,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
   String? _validateGroup(String? v) {
     final text = (v ?? '').trim();
-    if (text.isEmpty) return null; // the group is optional
+    if (text.isEmpty) return null;
     if (!_groupPattern.hasMatch(text)) return 'Like IT-2302';
     return null;
   }
@@ -89,7 +86,6 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     final name = widget.profile.name;
-    // Counted again on every build, from the list itself.
     final lists = widget.sessions.fold(
       0,
       (count, s) => s.contains(name) ? count + 1 : count,

@@ -7,7 +7,6 @@ abstract final class Routes {
   static const form = '/session/form';
 }
 
-/// What the detail screen gets: the session and callbacks to the shell.
 class DetailArgs {
   final StudySession session;
   final Profile profile;
@@ -24,7 +23,6 @@ class DetailArgs {
   });
 }
 
-/// What the form gets: a session to edit, or null for a new one.
 class FormArgs {
   final StudySession? session;
 

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A row: icon on the left, a title and an optional subtitle.
-/// Like ListTile, but without a leading parameter.
 class InfoTile extends StatelessWidget {
   final Widget icon;
   final String title;

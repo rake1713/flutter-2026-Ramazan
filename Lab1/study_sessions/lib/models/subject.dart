@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// The category of a study session.
 enum Subject {
   math('Math', Icons.functions),
   programming('Programming', Icons.code),
@@ -14,8 +13,6 @@ enum Subject {
   final String label;
   final IconData icon;
 
-  /// A colour role from the current scheme, so light and dark both work.
-  /// The switch is exhaustive: a new value will not compile until it is here.
   Color color(ColorScheme scheme) => switch (this) {
     Subject.math => scheme.primaryContainer,
     Subject.programming => scheme.secondaryContainer,

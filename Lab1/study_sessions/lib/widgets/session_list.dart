@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/study_session.dart';
 import 'session_card.dart';
 
-/// A list on phones, a grid when this widget gets 600 px or more.
-/// LayoutBuilder asks about MY box, not about the whole screen.
 class SessionList extends StatelessWidget {
   final List<StudySession> sessions;
   final void Function(StudySession) onOpen;
@@ -34,8 +32,8 @@ class SessionList extends StatelessWidget {
           return GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 360, // a cell is never wider than 360
-              mainAxisExtent: 128, // a cell needs a height: two title lines
+              maxCrossAxisExtent: 360,
+              mainAxisExtent: 128,
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
             ),

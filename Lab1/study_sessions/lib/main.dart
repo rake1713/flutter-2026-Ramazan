@@ -9,7 +9,6 @@ import 'shell.dart';
 
 void main() => runApp(const MyApp());
 
-/// Stateful because it holds the theme mode, above MaterialApp.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -45,7 +44,7 @@ class _MyAppState extends State<MyApp> {
           builder: (_) => SessionFormScreen(session: args.session),
         );
       default:
-        return null; // -> onUnknownRoute
+        return null;
     }
   }
 
@@ -53,7 +52,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Study Sessions',
-      // The only colour in lib/: the seed. Every other colour is a role.
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),

@@ -5,8 +5,6 @@ import '../models/subject.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/session_list.dart';
 
-/// Tab 1: search, subject chips, past filter and the list.
-/// The sessions come from the shell; this tab only keeps its filters.
 class SessionsTab extends StatefulWidget {
   final List<StudySession> sessions;
   final void Function(StudySession) onOpen;
@@ -26,7 +24,7 @@ class SessionsTab extends StatefulWidget {
 class _SessionsTabState extends State<SessionsTab> {
   final _searchController = TextEditingController();
   String _query = '';
-  Subject? _subject; // null means "All"
+  Subject? _subject;
   bool _showPast = false;
 
   @override
@@ -40,8 +38,6 @@ class _SessionsTabState extends State<SessionsTab> {
     setState(() => _query = '');
   }
 
-  /// The sessions to show: filtered, then sorted. A new list every time,
-  /// so sorting never changes the shell's list.
   List<StudySession> _visibleSessions() {
     final query = _query.trim().toLowerCase();
     final result = widget.sessions

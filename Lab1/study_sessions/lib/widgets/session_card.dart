@@ -4,7 +4,6 @@ import '../models/study_session.dart';
 import '../utils/format.dart';
 import 'session_avatar.dart';
 
-/// The one card used by the list, the grid and favourites.
 class SessionCard extends StatelessWidget {
   final StudySession session;
   final VoidCallback onTap;
