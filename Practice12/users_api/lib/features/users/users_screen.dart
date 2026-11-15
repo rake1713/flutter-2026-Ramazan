@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/api/api_exception.dart';
+import '../../core/widgets/generic_error.dart';
+import '../../core/widgets/loading_view.dart';
+import '../../core/widgets/message_view.dart';
+import '../../core/widgets/offline.dart';
+import '../../core/widgets/server_error.dart';
+import '../profile/profile_screen.dart';
+import '../settings/settings_model.dart';
+import '../settings/settings_screen.dart';
+import 'new_user_screen.dart';
+import 'user_list.dart';
+import 'users_model.dart';
+
+class UsersScreen extends StatelessWidget {
+  const UsersScreen({super.key});
+
+  Widget _list(UsersModel m, String? city) {
+    final shown = city == null
+        ? m.items
+        : m.items.where((u) => u.address.city == city).toList();
+    return Column(
+      children: [
+        if (m.fromCache)
+          MaterialBanner(
+            content: const Text('Saved data · no connection'),
+            leading: const Icon(Icons.cloud_off),
+            actions: [
+              TextButton(onPressed: m.load, child: const Text('Retry')),
+            ],
+          ),
+        Expanded(
+          child: RefreshIndicator(onRefresh: m.load, child: UserList(shown)),
+        ),
+      ],
+    );
+  }
+
+  Widget _body(UsersModel m, String? city) {
+    if (m.loading) return const LoadingView();
+    return switch (m.error) {
+      null => _list(m, city),
+      NoConnectionException() => Offline(onRetry: m.load),
+      NotFoundException() || UnauthorizedException() => const MessageView(
+        icon: Icons.block,
+        text: 'Not available',
+      ),
+      ServerException(:final status) => ServerError(status, onRetry: m.load),
+      BadResponseException() => const GenericError(),
+    };
+  }
+
+  void _open(BuildContext context, Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final m = context.watch<UsersModel>();
+    final city = context.watch<SettingsModel>().city;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(city ?? 'Users'),
+        actions: [
+          IconButton(
+            onPressed: () => _open(context, const NewUserScreen()),
+            icon: const Icon(Icons.person_add),
+          ),
+          IconButton(
+            onPressed: () => _open(context, const ProfileScreen()),
+            icon: const Icon(Icons.account_circle),
+          ),
+          IconButton(
+            onPressed: () => _open(context, const SettingsScreen()),
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+      ),
+      body: _body(m, city),
+    );
+  }
+}
