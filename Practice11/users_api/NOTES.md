@@ -72,3 +72,7 @@ Host typo jsonplaceholder.typicode.co -> Offline view with Retry, fixed host -> 
 
 No route (host that does not exist): NoConnectionException after 48 ms
 Packets that never come back (address that does not answer): NoConnectionException after 10002 ms, this is the 10 second timeout
+
+DevTools -> Network on the emulator with host 10.255.255.1: the /users row has no status ("--") and stays Pending.
+The app shows the Offline view after 10 seconds, but the row never finishes, because .timeout only stops waiting, it does not close the request.
+With the real host: GET /users -> 200, json, about 2 s, the Response is a list of 10 items.
