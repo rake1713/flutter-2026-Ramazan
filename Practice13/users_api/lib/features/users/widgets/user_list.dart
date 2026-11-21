@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'user.dart';
-import 'user_detail_screen.dart';
+import 'package:users_api/features/users/user.dart';
+import 'package:users_api/features/users/user_detail_screen.dart';
 
 class UserList extends StatelessWidget {
   const UserList(this.users, {super.key});

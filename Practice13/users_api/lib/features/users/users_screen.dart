@@ -11,7 +11,7 @@ import '../profile/profile_screen.dart';
 import '../settings/settings_model.dart';
 import '../settings/settings_screen.dart';
 import 'new_user_screen.dart';
-import 'user_list.dart';
+import 'widgets/user_list.dart';
 import 'users_model.dart';
 
 class UsersScreen extends StatelessWidget {
