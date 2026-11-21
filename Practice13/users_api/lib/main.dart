@@ -7,6 +7,7 @@ import 'core/storage/secure_store.dart';
 import 'features/auth/auth_model.dart';
 import 'features/auth/login_screen.dart';
 import 'features/settings/settings_model.dart';
+// import 'features/users/fake_user_repository.dart';
 import 'features/users/user_repository.dart';
 import 'features/users/users_cache.dart';
 import 'features/users/users_model.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
 
   final api = ApiClient(store);
   final UserRepository repo = HttpUserRepository(api, const UsersCache());
+  // final UserRepository repo = FakeUserRepository();
 
   runApp(
     MultiProvider(
