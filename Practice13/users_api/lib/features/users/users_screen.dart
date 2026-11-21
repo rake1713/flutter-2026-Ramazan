@@ -11,8 +11,9 @@ import '../profile/profile_screen.dart';
 import '../settings/settings_model.dart';
 import '../settings/settings_screen.dart';
 import 'new_user_screen.dart';
-import 'widgets/user_list.dart';
 import 'users_model.dart';
+import 'widgets/offline_banner.dart';
+import 'widgets/user_list.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
@@ -23,14 +24,7 @@ class UsersScreen extends StatelessWidget {
         : m.items.where((u) => u.address.city == city).toList();
     return Column(
       children: [
-        if (m.fromCache)
-          MaterialBanner(
-            content: const Text('Saved data · no connection'),
-            leading: const Icon(Icons.cloud_off),
-            actions: [
-              TextButton(onPressed: m.load, child: const Text('Retry')),
-            ],
-          ),
+        if (m.fromCache) OfflineBanner(onRetry: m.load),
         Expanded(
           child: RefreshIndicator(onRefresh: m.load, child: UserList(shown)),
         ),
