@@ -23,5 +23,11 @@ void main() {
 
       expect(() => User.fromJson(json), throwsA(isA<TypeError>()));
     });
+
+    test('lat as a number throws in Geo.fromJson', () {
+      final json = {'lat': -37.3159, 'lng': '81.1496'};
+
+      expect(() => Geo.fromJson(json), throwsA(isA<TypeError>()));
+    });
   });
 }

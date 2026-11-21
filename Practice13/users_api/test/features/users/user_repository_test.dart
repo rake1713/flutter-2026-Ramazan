@@ -9,6 +9,7 @@ import 'package:users_api/features/users/user_repository.dart';
 import 'package:users_api/features/users/users_cache.dart';
 
 import '../../fakes/fake_secure_store.dart';
+import 'user_json.dart';
 
 HttpUserRepository _repo(MockClient client) {
   return HttpUserRepository(
@@ -39,6 +40,15 @@ void main() {
       );
 
       expect(repo.getById(1), throwsA(isA<NoConnectionException>()));
+    });
+
+    test('lat as a number -> BadResponseException', () {
+      final broken = user1Json.replaceFirst('"-37.3159"', '-37.3159');
+      final repo = _repo(
+        MockClient((_) async => http.Response('[$broken]', 200)),
+      );
+
+      expect(repo.getAll(), throwsA(isA<BadResponseException>()));
     });
   });
 }
