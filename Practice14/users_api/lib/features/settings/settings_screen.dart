@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auth/auth_model.dart';
 import '../users/users_model.dart';
+import 'about_screen.dart';
+import 'dev_host_tile.dart';
 import 'settings_model.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -38,6 +41,13 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (c) => settings.setCity(c),
           ),
           const SizedBox(height: 24),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const AboutScreen())),
+          ),
+          if (kDebugMode) const DevHostTile(),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Sign out'),

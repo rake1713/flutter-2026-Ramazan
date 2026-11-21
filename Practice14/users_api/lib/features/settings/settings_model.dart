@@ -2,13 +2,20 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsModel extends ChangeNotifier {
-  SettingsModel(this._prefs, {required this.dark, this.city, this.avatarPath});
+  SettingsModel(
+    this._prefs, {
+    required this.dark,
+    this.city,
+    this.avatarPath,
+    this.devHost,
+  });
 
   final SharedPreferencesAsync _prefs;
 
   bool dark;
   String? city;
   String? avatarPath;
+  String? devHost;
 
   Future<void> setDark(bool v) async {
     dark = v;
@@ -30,5 +37,15 @@ class SettingsModel extends ChangeNotifier {
     avatarPath = path;
     notifyListeners();
     await _prefs.setString('avatarPath', path);
+  }
+
+  Future<void> setDevHost(String? host) async {
+    devHost = host;
+    notifyListeners();
+    if (host == null) {
+      await _prefs.remove('devHost');
+    } else {
+      await _prefs.setString('devHost', host);
+    }
   }
 }

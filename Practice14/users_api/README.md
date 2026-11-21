@@ -1,24 +1,48 @@
-# users_api
+# Users
 
-Users app from Practices 11-12 (jsonplaceholder), refactored in Practice 13:
-feature-first folders, a repository interface with a real and a fake implementation, tests.
+Users app from Practices 11-14: a list of users from jsonplaceholder, offline cache, login, settings, profile photo.
+Release build: 1.0.1 (2), applicationId kz.ramazan.users.
+
+## Run and build
 
 ```
-lib/core/       api client, exceptions, secure storage, shared widgets
-lib/features/   users, auth, settings, profile
-test/           mirrors lib/ + test/fakes
+flutter run
+flutter run --dart-define=USE_FAKES=true
+flutter run --dart-define-from-file=env/local.json
+flutter build apk --release --dart-define-from-file=env/prod.json
 ```
 
-Run: `flutter run`. Tests: `flutter test`.
+Full release:
 
-## Quality checklist
+```
+flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --dart-define-from-file=env/prod.json
+```
+
+## Pre-release checklist
+
+- [x] applicationId is mine: kz.ramazan.users (build.gradle.kts)
+- [x] version bumped, versionCode from pubspec: 1.0.1+2 (pubspec.yaml)
+- [ ] release signed with my own upload key (keytool -printcert in NOTES.md)
+- [x] key and key.properties are gitignored and never committed (.gitignore, git log check)
+- [ ] key backed up outside this laptop (NOTES.md)
+- [x] INTERNET in the main manifest (AndroidManifest.xml)
+- [x] only the permissions I use + iOS usage strings (CAMERA, Info.plist)
+- [x] app name "Users" (AndroidManifest.xml, Info.plist)
+- [x] my own icon, adaptive on Android (flutter_launcher_icons)
+- [x] my own splash, Android 12 included (flutter_native_splash)
+- [ ] built with env/prod.json, About shows prod (screenshot_about_release.png)
+- [ ] obfuscated, symbols archived per version (releases/1.0.1+2/)
+- [ ] installed from the file on a real phone over mobile data (screenshot_about_release.png)
+- [x] flutter analyze 0, dart format clean, flutter test green, layer grep empty
+
+## Quality
 
 ```
 $ flutter analyze
 No issues found!
 
 $ dart format .
-Formatted 37 files (0 changed)
+Formatted 40 files (0 changed)
 
 $ flutter test
 00:03 +10: All tests passed!

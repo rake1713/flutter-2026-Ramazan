@@ -1,4 +1,4 @@
-package com.example.users_api
+package kz.ramazan.users
 
 import io.flutter.embedding.android.FlutterActivity
 

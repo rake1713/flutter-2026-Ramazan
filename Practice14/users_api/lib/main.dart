@@ -1,13 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/api/api_client.dart';
+import 'core/env.dart';
 import 'core/storage/secure_store.dart';
 import 'features/auth/auth_model.dart';
 import 'features/auth/login_screen.dart';
 import 'features/settings/settings_model.dart';
-// import 'features/users/fake_user_repository.dart';
+import 'features/users/fake_user_repository.dart';
 import 'features/users/user_repository.dart';
 import 'features/users/users_cache.dart';
 import 'features/users/users_model.dart';
@@ -20,20 +22,27 @@ Future<void> main() async {
   final dark = await prefs.getBool('darkMode') ?? false;
   final city = await prefs.getString('cityFilter');
   final avatar = await prefs.getString('avatarPath');
+  final devHost = kDebugMode ? await prefs.getString('devHost') : null;
 
   const store = SecureStore();
   final token = await store.readToken();
 
-  final api = ApiClient(store);
-  final UserRepository repo = HttpUserRepository(api, const UsersCache());
-  // final UserRepository repo = FakeUserRepository();
+  final api = ApiClient(store, host: devHost ?? Env.host);
+  final UserRepository repo = Env.useFakes
+      ? FakeUserRepository()
+      : HttpUserRepository(api, const UsersCache());
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) =>
-              SettingsModel(prefs, dark: dark, city: city, avatarPath: avatar),
+          create: (_) => SettingsModel(
+            prefs,
+            dark: dark,
+            city: city,
+            avatarPath: avatar,
+            devHost: devHost,
+          ),
         ),
         ChangeNotifierProvider(create: (_) => AuthModel(store, token: token)),
         ChangeNotifierProvider(create: (_) => UsersModel(repo)..load()),
