@@ -9,7 +9,7 @@ version: 1.0.1+2
 - 1.0.1 is versionName: for people, shown in the store and in About. Changes when we want (1.0.0 -> 1.0.1).
 - 2 is versionCode (build number): for the store, a plain integer. It must go up on every upload, the store refuses the same or a lower one.
 
-With versionCode = 1 hard-coded in Gradle and pubspec at +3, About still showed (1). That is how the third upload gets rejected.
+If versionCode = 1 is hard-coded in Gradle, bumping pubspec to +3 changes nothing: the build number stays 1, so the store rejects the upload.
 
 ## Level 2 - the key
 
@@ -31,7 +31,7 @@ git push --force --all
 
 lib/core/env.dart is the only file with fromEnvironment.
 USE_FAKES=true -> FakeUserRepository, two users, no network.
-ENV=staging, API_HOST=example.invalid -> About shows both, the list shows the Offline view.
+ENV=staging, API_HOST=example.invalid -> About shows both values, and the list shows the Offline view because that host does not exist.
 
 The developer host switch can not be done with fromEnvironment: those values are const, baked in at build time, the app can not change them while it runs.
 So the switch saves the host in shared_preferences and main.dart reads it on the next start.
