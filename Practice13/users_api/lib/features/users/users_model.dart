@@ -14,6 +14,14 @@ class UsersModel extends ChangeNotifier {
   bool loading = false;
   bool fromCache = false;
 
+  List<User> itemsIn(String? city) {
+    if (city == null) return items;
+    return [
+      for (final u in items)
+        if (u.address.city == city) u,
+    ];
+  }
+
   Future<void> load() async {
     loading = true;
     error = null;
