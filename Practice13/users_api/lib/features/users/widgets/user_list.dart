@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:users_api/features/users/user.dart';
 import 'package:users_api/features/users/user_detail_screen.dart';
+import 'package:users_api/features/users/widgets/user_tile.dart';
 
 class UserList extends StatelessWidget {
   const UserList(this.users, {super.key});
@@ -16,10 +16,8 @@ class UserList extends StatelessWidget {
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, i) {
         final u = users[i];
-        return ListTile(
-          title: Text(u.name),
-          subtitle: Text('${u.email}\n${u.address.city}'),
-          isThreeLine: true,
+        return UserTile(
+          user: u,
           onTap: () => Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => UserDetailScreen(user: u))),
