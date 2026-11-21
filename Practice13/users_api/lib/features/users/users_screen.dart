@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/api/api_exception.dart';
-import '../../core/widgets/generic_error.dart';
 import '../../core/widgets/loading_view.dart';
-import '../../core/widgets/message_view.dart';
-import '../../core/widgets/offline.dart';
-import '../../core/widgets/server_error.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_model.dart';
 import '../settings/settings_screen.dart';
@@ -14,6 +9,7 @@ import 'new_user_screen.dart';
 import 'users_model.dart';
 import 'widgets/offline_banner.dart';
 import 'widgets/user_list.dart';
+import 'widgets/users_error_view.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
@@ -34,16 +30,10 @@ class UsersScreen extends StatelessWidget {
 
   Widget _body(UsersModel m, String? city) {
     if (m.loading) return const LoadingView();
-    return switch (m.error) {
-      null => _list(m, city),
-      NoConnectionException() => Offline(onRetry: m.load),
-      NotFoundException() || UnauthorizedException() => const MessageView(
-        icon: Icons.block,
-        text: 'Not available',
-      ),
-      ServerException(:final status) => ServerError(status, onRetry: m.load),
-      BadResponseException() => const GenericError(),
-    };
+    if (m.error case final e?) {
+      return UsersErrorView(error: e, onRetry: m.load);
+    }
+    return _list(m, city);
   }
 
   void _open(BuildContext context, Widget screen) {
