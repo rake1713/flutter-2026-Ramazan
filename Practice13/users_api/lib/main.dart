@@ -24,6 +24,7 @@ Future<void> main() async {
   final token = await store.readToken();
 
   final api = ApiClient(store);
+  final UserRepository repo = HttpUserRepository(api, const UsersCache());
 
   runApp(
     MultiProvider(
@@ -33,10 +34,7 @@ Future<void> main() async {
               SettingsModel(prefs, dark: dark, city: city, avatarPath: avatar),
         ),
         ChangeNotifierProvider(create: (_) => AuthModel(store, token: token)),
-        ChangeNotifierProvider(
-          create: (_) =>
-              UsersModel(UserRepository(api, const UsersCache()))..load(),
-        ),
+        ChangeNotifierProvider(create: (_) => UsersModel(repo)..load()),
       ],
       child: const App(),
     ),

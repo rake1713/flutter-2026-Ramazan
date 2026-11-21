@@ -4,8 +4,14 @@ import 'user.dart';
 import 'users_cache.dart';
 import 'users_result.dart';
 
-class UserRepository {
-  UserRepository(this._api, this._cache);
+abstract interface class UserRepository {
+  Future<UsersResult> getAll();
+  Future<User> getById(int id);
+  Future<User> create(User draft);
+}
+
+class HttpUserRepository implements UserRepository {
+  HttpUserRepository(this._api, this._cache);
 
   final ApiClient _api;
   final UsersCache _cache;
@@ -22,6 +28,7 @@ class UserRepository {
     }
   }
 
+  @override
   Future<UsersResult> getAll() async {
     try {
       final fresh = await _fetch();
@@ -34,6 +41,7 @@ class UserRepository {
     }
   }
 
+  @override
   Future<User> getById(int id) async {
     final data = await _api.get(_api.uri('/users/$id'));
     try {
@@ -43,6 +51,7 @@ class UserRepository {
     }
   }
 
+  @override
   Future<User> create(User draft) async {
     final data = await _api.post(
       _api.uri('/users'),
