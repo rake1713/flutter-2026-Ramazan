@@ -2,6 +2,7 @@ import '../../core/api/api_client.dart';
 import '../../core/api/api_exception.dart';
 import 'user.dart';
 import 'users_cache.dart';
+import 'users_result.dart';
 
 class UserRepository {
   UserRepository(this._api, this._cache);
@@ -21,15 +22,15 @@ class UserRepository {
     }
   }
 
-  Future<({List<User> items, bool fromCache})> getAll() async {
+  Future<UsersResult> getAll() async {
     try {
       final fresh = await _fetch();
       await _cache.save(fresh);
-      return (items: fresh, fromCache: false);
+      return UsersResult(items: fresh, fromCache: false);
     } on NoConnectionException {
       final saved = await _cache.load();
       if (saved == null) rethrow;
-      return (items: saved, fromCache: true);
+      return UsersResult(items: saved, fromCache: true);
     }
   }
 
