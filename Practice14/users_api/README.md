@@ -15,14 +15,14 @@ flutter build apk --release --dart-define-from-file=env/prod.json
 Full release:
 
 ```
-flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --dart-define-from-file=env/prod.json
+flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --dart-define-from-file=env/prod.json -P force-version-code-ignoring-abi=true
 ```
 
 ## Pre-release checklist
 
 - [x] applicationId is mine: kz.ramazan.users (build.gradle.kts)
 - [x] version bumped, versionCode from pubspec: 1.0.1+2 (pubspec.yaml)
-- [ ] release signed with my own upload key (keytool -printcert in NOTES.md)
+- [x] release signed with my own upload key (keytool -printcert in NOTES.md)
 - [x] key and key.properties are gitignored and never committed (.gitignore, git log check)
 - [ ] key backed up outside this laptop (NOTES.md)
 - [x] INTERNET in the main manifest (AndroidManifest.xml)
@@ -30,8 +30,8 @@ flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build
 - [x] app name "Users" (AndroidManifest.xml, Info.plist)
 - [x] my own icon, adaptive on Android (flutter_launcher_icons)
 - [x] my own splash, Android 12 included (flutter_native_splash)
-- [ ] built with env/prod.json, About shows prod (screenshot_about_release.png)
-- [ ] obfuscated, symbols archived per version (releases/1.0.1+2/)
+- [x] built with env/prod.json, About shows prod (screenshot_about_release.png)
+- [x] obfuscated, symbols archived per version (releases/1.0.1+2/)
 - [ ] installed from the file on a real phone over mobile data (screenshot_about_release.png)
 - [x] flutter analyze 0, dart format clean, flutter test green, layer grep empty
 
@@ -45,7 +45,7 @@ $ dart format .
 Formatted 40 files (0 changed)
 
 $ flutter test
-00:03 +10: All tests passed!
+00:04 +10: All tests passed!
 
 $ sh tool/check_layers.sh
 (nothing)
